@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         colors="true"
+         cacheDirectory=".phpunit.cache"
+         executionOrder="depends,defects"
+         failOnRisky="true"
+         failOnWarning="true">
+
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Integration">
+            <directory>tests/Integration</directory>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory>tests/Feature</directory>
+        </testsuite>
+    </testsuites>
+
+    <php>
+        <!-- Test database config (uses kreblu_test database) -->
+        <env name="OS_DB_HOST" value="127.0.0.1"/>
+        <env name="OS_DB_PORT" value="3306"/>
+        <env name="OS_DB_NAME" value="kreblu_test"/>
+        <env name="OS_DB_USER" value="kreblu"/>
+        <env name="OS_DB_PASS" value="kreblu_dev"/>
+        <env name="OS_DB_PREFIX" value="os_test_"/>
+        <env name="OS_DEBUG" value="true"/>
+        <env name="OS_ENV" value="testing"/>
+        <env name="OS_SITE_URL" value="http://localhost:8080"/>
+    </php>
+
+    <source>
+        <include>
+            <directory>os-core</directory>
+        </include>
+        <exclude>
+            <directory>os-core/Modules</directory>
+        </exclude>
+    </source>
+</phpunit>

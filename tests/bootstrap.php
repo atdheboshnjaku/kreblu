@@ -1,0 +1,26 @@
+<?php declare(strict_types=1);
+
+/**
+ * Kreblu Test Bootstrap
+ *
+ * Sets up the environment for PHPUnit tests.
+ * Uses Composer autoloader in dev (for PHPUnit classes)
+ * plus our own autoloader for Kreblu classes.
+ */
+
+// Define root path
+define('KREBLU_ROOT', dirname(__DIR__));
+
+// Use Composer autoloader for dev dependencies (PHPUnit, etc.)
+require KREBLU_ROOT . '/vendor/autoload.php';
+
+// Load our autoloader (for Kreblu classes)
+require KREBLU_ROOT . '/os-core/autoload.php';
+
+// Load helper functions
+require KREBLU_ROOT . '/os-core/Helpers/functions.php';
+require KREBLU_ROOT . '/os-core/Helpers/formatting.php';
+require KREBLU_ROOT . '/os-core/Helpers/url.php';
+
+// Mark as installed for testing (config comes from phpunit.xml env vars)
+define('KREBLU_INSTALLED', true);

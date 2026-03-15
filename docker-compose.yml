@@ -1,0 +1,71 @@
+# Kreblu Development Environment
+# Usage: docker compose up -d
+# Access: http://localhost:8080
+# MySQL:  localhost:3306 (user: kreblu / pass: kreblu_dev)
+#
+# This is for DEVELOPMENT ONLY. Normal users never see this.
+# They install Kreblu via browser installer on their hosting.
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kreblu-app
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/kreblu
+      - ./docker/php/kreblu.ini:/usr/local/etc/php/conf.d/kreblu.ini
+    ports:
+      - "8080:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - OS_DB_HOST=db
+      - OS_DB_PORT=3306
+      - OS_DB_NAME=kreblu
+      - OS_DB_USER=kreblu
+      - OS_DB_PASS=kreblu_dev
+      - OS_DEBUG=true
+      - OS_ENV=development
+    networks:
+      - kreblu-net
+
+  db:
+    image: mysql:8.4
+    container_name: kreblu-db
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root_dev
+      MYSQL_DATABASE: kreblu
+      MYSQL_USER: kreblu
+      MYSQL_PASSWORD: kreblu_dev
+    volumes:
+      - kreblu-db-data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: >
+      --default-authentication-plugin=caching_sha2_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --innodb-buffer-pool-size=256M
+      --innodb-log-file-size=64M
+      --max-allowed-packet=64M
+      --sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kreblu-net
+
+volumes:
+  kreblu-db-data:
+    driver: local
+
+networks:
+  kreblu-net:
+    driver: bridge
