@@ -1,7 +1,6 @@
 # Kreblu Development Dockerfile
-# Target: PHP 8.5+ (using 8.3-fpm as base until 8.5 images are available)
-# When PHP 8.5 is released, change the FROM line to: php:8.5-fpm
-FROM php:8.3-fpm
+# PHP 8.5 + Nginx + required extensions
+FROM php:8.5-fpm
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -14,32 +13,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libwebp-dev \
     libfreetype6-dev \
     libzip-dev \
-    libxml2-dev \
     libicu-dev \
-    libonig-dev \
-    libcurl4-openssl-dev \
     default-mysql-client \
     nginx \
     supervisor \
     && rm -rf /var/lib/apt/lists/*
 
-# Configure and install PHP extensions
-RUN docker-php-ext-configure gd \
-        --with-freetype \
-        --with-jpeg \
-        --with-webp \
-    && docker-php-ext-install -j$(nproc) \
-        pdo \
-        pdo_mysql \
-        mysqli \
-        gd \
-        zip \
-        xml \
-        intl \
-        mbstring \
-        curl \
-        fileinfo \
-        opcache
+# Use install-php-extensions (handles PHP 8.5 built-in detection correctly)
+ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+
+RUN install-php-extensions \
+    pdo_mysql \
+    mysqli \
+    gd \
+    zip \
+    intl
 
 # Install Composer (dev only - not shipped with the product)
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer

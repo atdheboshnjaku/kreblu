@@ -205,6 +205,8 @@ function os_current_user_can(string $capability): bool
  */
 function os_sanitize_text(string $input): string
 {
+    // Remove script/style tags AND their contents before stripping remaining tags
+    $input = preg_replace('/<(script|style)\b[^>]*>.*?<\/\1>/is', '', $input);
     return trim(strip_tags($input));
 }
 

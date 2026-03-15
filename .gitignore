@@ -1,0 +1,37 @@
+# Dependencies
+/vendor/
+node_modules/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment config (contains credentials)
+os-config.php
+
+# User content (generated at runtime)
+os-content/uploads/*
+os-content/cache/*
+os-content/logs/*
+!os-content/uploads/.gitkeep
+!os-content/cache/.gitkeep
+!os-content/logs/.gitkeep
+
+# Docker data
+docker/mysql/data/
+
+# Test output
+.phpunit.cache/
+
+# Build artifacts
+*.phar
+
+# Other crap
+.qodo/
