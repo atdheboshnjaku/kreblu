@@ -15,7 +15,7 @@ define('KREBLU_ROOT', dirname(__DIR__));
 require KREBLU_ROOT . '/vendor/autoload.php';
 
 // Load our autoloader (for Kreblu classes)
-require KREBLU_ROOT . '/os-core/autoload.php';
+require KREBLU_ROOT . '/kb-core/autoload.php';
 
 // Mark as installed for testing (config comes from phpunit.xml env vars)
 define('KREBLU_INSTALLED', true);

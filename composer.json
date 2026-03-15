@@ -32,14 +32,14 @@
     },
     "autoload": {
         "psr-4": {
-            "Kreblu\\Core\\": "os-core/",
-            "Kreblu\\Admin\\": "os-admin/controllers/",
-            "Kreblu\\CLI\\": "os-cli/commands/"
+            "Kreblu\\Core\\": "kb-core/",
+            "Kreblu\\Admin\\": "kb-admin/controllers/",
+            "Kreblu\\CLI\\": "kb-cli/commands/"
         },
         "files": [
-            "os-core/Helpers/functions.php",
-            "os-core/Helpers/formatting.php",
-            "os-core/Helpers/url.php"
+            "kb-core/Helpers/functions.php",
+            "kb-core/Helpers/formatting.php",
+            "kb-core/Helpers/url.php"
         ]
     },
     "autoload-dev": {

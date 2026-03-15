@@ -11,11 +11,11 @@
 define('KREBLU_ROOT', __DIR__);
 
 // Bootstrap the application
-require KREBLU_ROOT . '/os-core/bootstrap.php';
+require KREBLU_ROOT . '/kb-core/bootstrap.php';
 
 // If not installed, redirect to installer
 if (!KREBLU_INSTALLED) {
-    header('Location: /os-install/');
+    header('Location: /kb-install/');
     exit;
 }
 

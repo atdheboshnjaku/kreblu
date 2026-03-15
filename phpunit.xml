@@ -22,23 +22,23 @@
 
     <php>
         <!-- Test database config (uses kreblu_test database) -->
-        <env name="OS_DB_HOST" value="127.0.0.1"/>
-        <env name="OS_DB_PORT" value="3306"/>
-        <env name="OS_DB_NAME" value="kreblu_test"/>
-        <env name="OS_DB_USER" value="kreblu"/>
-        <env name="OS_DB_PASS" value="kreblu_dev"/>
-        <env name="OS_DB_PREFIX" value="os_test_"/>
-        <env name="OS_DEBUG" value="true"/>
-        <env name="OS_ENV" value="testing"/>
-        <env name="OS_SITE_URL" value="http://localhost:8080"/>
+        <env name="KB_DB_HOST" value="db"/>
+        <env name="KB_DB_PORT" value="3306"/>
+        <env name="KB_DB_NAME" value="kreblu_test"/>
+        <env name="KB_DB_USER" value="kreblu"/>
+        <env name="KB_DB_PASS" value="kreblu_dev"/>
+        <env name="KB_DB_PREFIX" value="kb_test_"/>
+        <env name="KB_DEBUG" value="true"/>
+        <env name="KB_ENV" value="testing"/>
+        <env name="KB_SITE_URL" value="http://localhost:8080"/>
     </php>
 
     <source>
         <include>
-            <directory>os-core</directory>
+            <directory>kb-core</directory>
         </include>
         <exclude>
-            <directory>os-core/Modules</directory>
+            <directory>kb-core/Modules</directory>
         </exclude>
     </source>
 </phpunit>

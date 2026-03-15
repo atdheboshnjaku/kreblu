@@ -3,14 +3,14 @@
     <description>Kreblu coding standard based on PSR-12</description>
 
     <!-- What to scan -->
-    <file>os-core</file>
-    <file>os-admin/controllers</file>
-    <file>os-cli/commands</file>
+    <file>kb-core</file>
+    <file>kb-admin/controllers</file>
+    <file>kb-cli/commands</file>
     <file>tests</file>
 
     <!-- What to ignore -->
     <exclude-pattern>vendor/*</exclude-pattern>
-    <exclude-pattern>os-content/*</exclude-pattern>
+    <exclude-pattern>kb-content/*</exclude-pattern>
     <exclude-pattern>node_modules/*</exclude-pattern>
     <exclude-pattern>docker/*</exclude-pattern>
 

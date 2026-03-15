@@ -5,8 +5,8 @@ namespace Kreblu\Core;
 /**
  * Configuration Manager
  *
- * Reads configuration from os-config.php constants and environment variables.
- * Environment variables (prefixed with OS_) override config file values.
+ * Reads configuration from kb-config.php constants and environment variables.
+ * Environment variables (prefixed with KB_) override config file values.
  * This allows Docker and CI environments to inject config without modifying files.
  */
 final class Config
@@ -55,27 +55,27 @@ final class Config
     }
 
     /**
-     * Load configuration from os-config.php defined constants.
+     * Load configuration from kb-config.php defined constants.
      *
-     * Constants follow the pattern: OS_DB_HOST, OS_DB_NAME, etc.
+     * Constants follow the pattern: KB_DB_HOST, KB_DB_NAME, etc.
      * They are mapped to config keys: db_host, db_name, etc.
      */
     private function loadFromConstants(): void
     {
         $mapping = [
-            'OS_DB_HOST'     => 'db_host',
-            'OS_DB_PORT'     => 'db_port',
-            'OS_DB_NAME'     => 'db_name',
-            'OS_DB_USER'     => 'db_user',
-            'OS_DB_PASS'     => 'db_pass',
-            'OS_DB_PREFIX'   => 'db_prefix',
-            'OS_SITE_URL'    => 'site_url',
-            'OS_DEBUG'       => 'debug',
-            'OS_ENV'         => 'environment',
-            'OS_AUTH_KEY'    => 'auth_key',
-            'OS_SECURE_KEY'  => 'secure_key',
-            'OS_NONCE_KEY'   => 'nonce_key',
-            'OS_NONCE_SALT'  => 'nonce_salt',
+            'KB_DB_HOST'     => 'db_host',
+            'KB_DB_PORT'     => 'db_port',
+            'KB_DB_NAME'     => 'db_name',
+            'KB_DB_USER'     => 'db_user',
+            'KB_DB_PASS'     => 'db_pass',
+            'KB_DB_PREFIX'   => 'db_prefix',
+            'KB_SITE_URL'    => 'site_url',
+            'KB_DEBUG'       => 'debug',
+            'KB_ENV'         => 'environment',
+            'KB_AUTH_KEY'    => 'auth_key',
+            'KB_SECURE_KEY'  => 'secure_key',
+            'KB_NONCE_KEY'   => 'nonce_key',
+            'KB_NONCE_SALT'  => 'nonce_salt',
         ];
 
         foreach ($mapping as $constant => $key) {
@@ -87,7 +87,7 @@ final class Config
         // Defaults
         $this->values['db_host']    ??= 'localhost';
         $this->values['db_port']    ??= 3306;
-        $this->values['db_prefix']  ??= 'os_';
+        $this->values['db_prefix']  ??= 'kb_';
         $this->values['debug']      ??= false;
         $this->values['environment'] ??= 'production';
     }
@@ -95,21 +95,21 @@ final class Config
     /**
      * Load configuration from environment variables.
      *
-     * Environment variables override constants from os-config.php.
+     * Environment variables override constants from kb-config.php.
      * This allows Docker, CI, and hosting platforms to inject config.
      */
     private function loadFromEnvironment(): void
     {
         $envMapping = [
-            'OS_DB_HOST'   => 'db_host',
-            'OS_DB_PORT'   => 'db_port',
-            'OS_DB_NAME'   => 'db_name',
-            'OS_DB_USER'   => 'db_user',
-            'OS_DB_PASS'   => 'db_pass',
-            'OS_DB_PREFIX' => 'db_prefix',
-            'OS_SITE_URL'  => 'site_url',
-            'OS_DEBUG'     => 'debug',
-            'OS_ENV'       => 'environment',
+            'KB_DB_HOST'   => 'db_host',
+            'KB_DB_PORT'   => 'db_port',
+            'KB_DB_NAME'   => 'db_name',
+            'KB_DB_USER'   => 'db_user',
+            'KB_DB_PASS'   => 'db_pass',
+            'KB_DB_PREFIX' => 'db_prefix',
+            'KB_SITE_URL'  => 'site_url',
+            'KB_DEBUG'     => 'debug',
+            'KB_ENV'       => 'environment',
         ];
 
         foreach ($envMapping as $envVar => $key) {

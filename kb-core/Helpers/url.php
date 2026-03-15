@@ -9,9 +9,9 @@
 /**
  * Get the site's base URL (no trailing slash).
  */
-function os_site_url(string $path = ''): string
+function kb_site_url(string $path = ''): string
 {
-    $base = rtrim((string) os_app()->config()->get('site_url', ''), '/');
+    $base = rtrim((string) kb_app()->config()->get('site_url', ''), '/');
     if ($path === '') {
         return $base;
     }
@@ -21,64 +21,64 @@ function os_site_url(string $path = ''): string
 /**
  * Get the URL to the admin panel.
  */
-function os_admin_url(string $path = ''): string
+function kb_admin_url(string $path = ''): string
 {
-    return os_site_url('os-admin/' . ltrim($path, '/'));
+    return kb_site_url('kb-admin/' . ltrim($path, '/'));
 }
 
 /**
  * Get the URL to the REST API.
  */
-function os_api_url(string $path = ''): string
+function kb_api_url(string $path = ''): string
 {
-    return os_site_url('api/v1/' . ltrim($path, '/'));
+    return kb_site_url('api/v1/' . ltrim($path, '/'));
 }
 
 /**
  * Get the URL to a theme asset file with cache-busting.
  */
-function os_asset(string $path): string
+function kb_asset(string $path): string
 {
-    $fullPath = KREBLU_ROOT . '/os-content/themes/' . $path;
+    $fullPath = KREBLU_ROOT . '/kb-content/themes/' . $path;
     $version = file_exists($fullPath) ? substr(md5_file($fullPath) ?: '', 0, 8) : KREBLU_VERSION;
-    return os_site_url('os-content/themes/' . $path) . '?v=' . $version;
+    return kb_site_url('kb-content/themes/' . $path) . '?v=' . $version;
 }
 
 /**
  * Get the URL to an admin asset file.
  */
-function os_admin_asset(string $path): string
+function kb_admin_asset(string $path): string
 {
-    $fullPath = KREBLU_ROOT . '/os-admin/assets/' . $path;
+    $fullPath = KREBLU_ROOT . '/kb-admin/assets/' . $path;
     $version = file_exists($fullPath) ? substr(md5_file($fullPath) ?: '', 0, 8) : KREBLU_VERSION;
-    return os_site_url('os-admin/assets/' . $path) . '?v=' . $version;
+    return kb_site_url('kb-admin/assets/' . $path) . '?v=' . $version;
 }
 
 /**
  * Get the URL to an uploaded media file.
  */
-function os_upload_url(string $path): string
+function kb_upload_url(string $path): string
 {
-    return os_site_url('os-content/uploads/' . ltrim($path, '/'));
+    return kb_site_url('kb-content/uploads/' . ltrim($path, '/'));
 }
 
 /**
  * Get the URL to a post by ID.
  */
-function os_post_url(int $id): string
+function kb_post_url(int $id): string
 {
-    $post = os_get_post($id);
+    $post = kb_get_post($id);
     if ($post === null) {
         return '';
     }
     // TODO: Use permalink structure from settings
-    return os_site_url($post->slug ?? '');
+    return kb_site_url($post->slug ?? '');
 }
 
 /**
  * Get the URL to a media file by ID.
  */
-function os_media_url(int $id): string
+function kb_media_url(int $id): string
 {
     // TODO: Implement with media manager lookup
     return '';
@@ -87,7 +87,7 @@ function os_media_url(int $id): string
 /**
  * Get the current request path (without query string).
  */
-function os_current_path(): string
+function kb_current_path(): string
 {
     $uri = $_SERVER['REQUEST_URI'] ?? '/';
     $path = parse_url($uri, PHP_URL_PATH);
@@ -97,9 +97,9 @@ function os_current_path(): string
 /**
  * Check if the current URL matches a given path pattern.
  */
-function os_is_path(string $pattern): bool
+function kb_is_path(string $pattern): bool
 {
-    $current = os_current_path();
+    $current = kb_current_path();
     // Simple wildcard matching
     $regex = '/^' . str_replace('\*', '.*', preg_quote($pattern, '/')) . '$/';
     return (bool) preg_match($regex, $current);
@@ -108,8 +108,8 @@ function os_is_path(string $pattern): bool
 /**
  * Get the current locale string (e.g., 'en_US').
  */
-function os_locale(): string
+function kb_locale(): string
 {
     // TODO: Implement with i18n module
-    return os_get_option('site_locale', 'en_US') ?: 'en_US';
+    return kb_get_option('site_locale', 'en_US') ?: 'en_US';
 }

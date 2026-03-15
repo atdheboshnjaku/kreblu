@@ -101,9 +101,9 @@ docker compose exec db mysql -u kreblu -pkreblu_dev kreblu
 ```
 kreblu/
 ├── index.php                 # Front controller — all requests come here
-├── os-config.sample.php      # Config template (installer generates os-config.php)
+├── kb-config.sample.php      # Config template (installer generates kb-config.php)
 ├── .htaccess                 # Apache rewrite rules
-├── os-core/                  # Core engine (the heart of Kreblu)
+├── kb-core/                  # Core engine (the heart of Kreblu)
 │   ├── App.php               # Service container
 │   ├── Config.php            # Configuration manager
 │   ├── bootstrap.php         # Application bootstrap
@@ -119,16 +119,16 @@ kreblu/
 │   ├── Api/                  # REST API router and endpoints
 │   ├── Security/             # Sanitization, CSRF, rate limiting
 │   ├── Modules/              # Built-in modules (Forms, SEO, i18n, etc.)
-│   └── Helpers/              # Global os_* helper functions
-├── os-admin/                 # Admin panel (vanilla JS, Web Components)
-├── os-content/               # User content (themes, plugins, uploads)
+│   └── Helpers/              # Global kb_* helper functions
+├── kb-admin/                 # Admin panel (vanilla JS, Web Components)
+├── kb-content/               # User content (themes, plugins, uploads)
 │   ├── themes/
 │   ├── plugins/
 │   ├── uploads/
 │   ├── cache/
 │   └── logs/
-├── os-cli/                   # CLI tools (for developers)
-├── os-install/               # Browser-based installer
+├── kb-cli/                   # CLI tools (for developers)
+├── kb-install/               # Browser-based installer
 ├── tests/                    # PHPUnit test suite
 └── docker/                   # Docker config (dev only, not shipped)
 ```

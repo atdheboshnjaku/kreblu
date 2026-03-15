@@ -58,7 +58,7 @@ final class ConfigTest extends TestCase
     public function test_loads_defaults_for_db_prefix(): void
     {
         $config = new Config();
-        // In test environment, phpunit.xml sets this to os_test_
+        // In test environment, phpunit.xml sets this to kb_test_
         $this->assertNotNull($config->get('db_prefix'));
         $this->assertStringEndsWith('_', $config->get('db_prefix'));
     }
@@ -66,32 +66,32 @@ final class ConfigTest extends TestCase
     public function test_environment_variable_override(): void
     {
         // Set an env var
-        putenv('OS_DB_HOST=test_host');
+        putenv('KB_DB_HOST=test_host');
 
         $config = new Config();
         $this->assertEquals('test_host', $config->get('db_host'));
 
         // Clean up
-        putenv('OS_DB_HOST');
+        putenv('KB_DB_HOST');
     }
 
     public function test_debug_env_parsed_as_boolean(): void
     {
-        putenv('OS_DEBUG=true');
+        putenv('KB_DEBUG=true');
 
         $config = new Config();
         $this->assertTrue($config->get('debug'));
 
-        putenv('OS_DEBUG');
+        putenv('KB_DEBUG');
     }
 
     public function test_port_env_parsed_as_integer(): void
     {
-        putenv('OS_DB_PORT=3307');
+        putenv('KB_DB_PORT=3307');
 
         $config = new Config();
         $this->assertSame(3307, $config->get('db_port'));
 
-        putenv('OS_DB_PORT');
+        putenv('KB_DB_PORT');
     }
 }

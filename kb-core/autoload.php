@@ -11,9 +11,9 @@
 spl_autoload_register(function (string $class): void {
     // Namespace prefix => base directory mappings
     $prefixes = [
-        'Kreblu\\Core\\'  => KREBLU_ROOT . '/os-core/',
-        'Kreblu\\Admin\\' => KREBLU_ROOT . '/os-admin/controllers/',
-        'Kreblu\\CLI\\'   => KREBLU_ROOT . '/os-cli/commands/',
+        'Kreblu\\Core\\'  => KREBLU_ROOT . '/kb-core/',
+        'Kreblu\\Admin\\' => KREBLU_ROOT . '/kb-admin/controllers/',
+        'Kreblu\\CLI\\'   => KREBLU_ROOT . '/kb-cli/commands/',
     ];
 
     foreach ($prefixes as $prefix => $baseDir) {

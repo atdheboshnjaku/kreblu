@@ -1,12 +1,12 @@
 parameters:
     level: 6
     paths:
-        - os-core
-        - os-admin/controllers
-        - os-cli/commands
+        - kb-core
+        - kb-admin/controllers
+        - kb-cli/commands
     excludePaths:
         - vendor
-        - os-content
+        - kb-content
         - tests
         - docker
     checkMissingIterableValueType: false

@@ -9,7 +9,7 @@
 /**
  * Generate a URL-safe slug from a string.
  */
-function os_slugify(string $text): string
+function kb_slugify(string $text): string
 {
     // Transliterate non-ASCII characters
     $text = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $text) ?: $text;
@@ -23,7 +23,7 @@ function os_slugify(string $text): string
 /**
  * Generate an excerpt from HTML content.
  */
-function os_excerpt(string $html, int $wordCount = 55, string $more = '&hellip;'): string
+function kb_excerpt(string $html, int $wordCount = 55, string $more = '&hellip;'): string
 {
     $text = strip_tags($html);
     $words = preg_split('/\s+/', trim($text), $wordCount + 1);
@@ -40,7 +40,7 @@ function os_excerpt(string $html, int $wordCount = 55, string $more = '&hellip;'
 /**
  * Truncate a string to a maximum length without breaking words.
  */
-function os_truncate(string $text, int $maxLength, string $suffix = '...'): string
+function kb_truncate(string $text, int $maxLength, string $suffix = '...'): string
 {
     if (mb_strlen($text) <= $maxLength) {
         return $text;
@@ -56,7 +56,7 @@ function os_truncate(string $text, int $maxLength, string $suffix = '...'): stri
 /**
  * Convert line breaks to <br> tags.
  */
-function os_nl2br(string $text): string
+function kb_nl2br(string $text): string
 {
     return nl2br(htmlspecialchars($text, ENT_QUOTES, 'UTF-8'));
 }
@@ -64,7 +64,7 @@ function os_nl2br(string $text): string
 /**
  * Escape a string for safe HTML output.
  */
-function os_esc(string $text): string
+function kb_esc(string $text): string
 {
     return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
 }
@@ -72,7 +72,7 @@ function os_esc(string $text): string
 /**
  * Format a date using the site's configured format.
  */
-function os_format_date(string|\DateTimeInterface $date, string $format = 'F j, Y'): string
+function kb_format_date(string|\DateTimeInterface $date, string $format = 'F j, Y'): string
 {
     if (is_string($date)) {
         $date = new \DateTimeImmutable($date);
@@ -83,7 +83,7 @@ function os_format_date(string|\DateTimeInterface $date, string $format = 'F j, 
 /**
  * Format a file size in bytes to human-readable format.
  */
-function os_format_bytes(int $bytes, int $precision = 1): string
+function kb_format_bytes(int $bytes, int $precision = 1): string
 {
     $units = ['B', 'KB', 'MB', 'GB', 'TB'];
     for ($i = 0; $bytes >= 1024 && $i < count($units) - 1; $i++) {

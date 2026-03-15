@@ -10,29 +10,29 @@
  */
 
 // == Database Settings ==
-define('OS_DB_HOST',   'localhost');
-define('OS_DB_PORT',   3306);
-define('OS_DB_NAME',   'kreblu');
-define('OS_DB_USER',   'your_db_user');
-define('OS_DB_PASS',   'your_db_password');
-define('OS_DB_PREFIX', 'os_');
+define('KB_DB_HOST',   'localhost');
+define('KB_DB_PORT',   3306);
+define('KB_DB_NAME',   'kreblu');
+define('KB_DB_USER',   'your_db_user');
+define('KB_DB_PASS',   'your_db_password');
+define('KB_DB_PREFIX', 'kb_');
 
 // == Site URL ==
 // No trailing slash. Example: https://example.com
-define('OS_SITE_URL', 'http://localhost');
+define('KB_SITE_URL', 'http://localhost');
 
 // == Security Keys ==
 // Change these to unique random strings. The installer generates these automatically.
 // You can regenerate them at: https://kreblu.org/secret-key-generator
-define('OS_AUTH_KEY',   'put-your-unique-phrase-here');
-define('OS_SECURE_KEY', 'put-your-unique-phrase-here');
-define('OS_NONCE_KEY',  'put-your-unique-phrase-here');
-define('OS_NONCE_SALT', 'put-your-unique-phrase-here');
+define('KB_AUTH_KEY',   'put-your-unique-phrase-here');
+define('KB_SECURE_KEY', 'put-your-unique-phrase-here');
+define('KB_NONCE_KEY',  'put-your-unique-phrase-here');
+define('KB_NONCE_SALT', 'put-your-unique-phrase-here');
 
 // == Debug Mode ==
 // Set to true for development. NEVER true in production.
-define('OS_DEBUG', false);
+define('KB_DEBUG', false);
 
 // == Environment ==
 // 'production', 'staging', or 'development'
-define('OS_ENV', 'production');
+define('KB_ENV', 'production');

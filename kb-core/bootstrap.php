@@ -3,7 +3,7 @@
 /**
  * Kreblu Bootstrap
  *
- * This file is required by every entry point (index.php, os-admin/index.php, cron.php, etc.)
+ * This file is required by every entry point (index.php, kb-admin/index.php, cron.php, etc.)
  * It loads configuration, sets up autoloading, and initializes core services.
  */
 
@@ -32,7 +32,7 @@ if (version_compare(PHP_VERSION, KREBLU_MIN_PHP, '<')) {
 }
 
 // Load configuration
-$configPath = KREBLU_ROOT . '/os-config.php';
+$configPath = KREBLU_ROOT . '/kb-config.php';
 if (file_exists($configPath)) {
     require $configPath;
     define('KREBLU_INSTALLED', true);
@@ -41,12 +41,12 @@ if (file_exists($configPath)) {
 }
 
 // Load the autoloader
-require KREBLU_ROOT . '/os-core/autoload.php';
+require KREBLU_ROOT . '/kb-core/autoload.php';
 
 // Load global helper functions
-require KREBLU_ROOT . '/os-core/Helpers/functions.php';
-require KREBLU_ROOT . '/os-core/Helpers/formatting.php';
-require KREBLU_ROOT . '/os-core/Helpers/url.php';
+require KREBLU_ROOT . '/kb-core/Helpers/functions.php';
+require KREBLU_ROOT . '/kb-core/Helpers/formatting.php';
+require KREBLU_ROOT . '/kb-core/Helpers/url.php';
 
 // Initialize the application container
 $app = Kreblu\Core\App::getInstance();
@@ -64,7 +64,7 @@ $app->register('db', function () use ($app) {
         name: $app->config()->get('db_name', ''),
         user: $app->config()->get('db_user', ''),
         pass: $app->config()->get('db_pass', ''),
-        prefix: $app->config()->get('db_prefix', 'os_'),
+        prefix: $app->config()->get('db_prefix', 'kb_'),
     );
 });
 
@@ -74,7 +74,7 @@ $app->register('hooks', function () {
 
 $app->register('cache', function () {
     return new Kreblu\Core\Cache\CacheManager(
-        KREBLU_ROOT . '/os-content/cache/'
+        KREBLU_ROOT . '/kb-content/cache/'
     );
 });
 

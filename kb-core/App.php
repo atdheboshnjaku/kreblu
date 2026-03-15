@@ -6,7 +6,7 @@ namespace Kreblu\Core;
  * Application Container
  *
  * Lightweight service container. Holds references to all core services
- * and provides them to plugins and themes through os_app().
+ * and provides them to plugins and themes through kb_app().
  *
  * Services are lazy-loaded: the factory callable is only executed
  * on first access, then the result is cached.

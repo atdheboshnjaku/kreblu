@@ -1,0 +1,16 @@
+[15-Mar-2026 22:43:27 UTC] PHP Fatal error:  Cannot redeclare function os_app() (previously declared in /var/www/kreblu/os-core/Helpers/functions.php:20) in /var/www/kreblu/os-core/Helpers/functions.php on line 20
+Stack trace:
+#0 /var/www/kreblu/vendor/phpunit/phpunit/src/TextUI/Application.php(352): include_once()
+#1 /var/www/kreblu/vendor/phpunit/phpunit/src/TextUI/Application.php(122): PHPUnit\TextUI\Application->loadBootstrapScript('/var/www/kreblu...')
+#2 /var/www/kreblu/vendor/phpunit/phpunit/phpunit(104): PHPUnit\TextUI\Application->run(Array)
+#3 /var/www/kreblu/vendor/bin/phpunit(122): include('/var/www/kreblu...')
+#4 {main}
+[15-Mar-2026 23:20:21 UTC] PHP Warning:  require(/var/www/kreblu/vendor/composer/../../os-core/Helpers/functions.php): Failed to open stream: No such file or directory in /var/www/kreblu/vendor/composer/autoload_real.php on line 41
+[15-Mar-2026 23:20:21 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/kreblu/vendor/composer/../../os-core/Helpers/functions.php' (include_path='.:/usr/local/lib/php') in /var/www/kreblu/vendor/composer/autoload_real.php:41
+Stack trace:
+#0 /var/www/kreblu/vendor/composer/autoload_real.php(45): {closure:ComposerAutoloaderInit1c276881860e763fb18502cd111f808e::getLoader():37}('b546e14463dda6c...', '/var/www/kreblu...')
+#1 /var/www/kreblu/vendor/autoload.php(22): ComposerAutoloaderInit1c276881860e763fb18502cd111f808e::getLoader()
+#2 /var/www/kreblu/vendor/phpunit/phpunit/phpunit(72): require('/var/www/kreblu...')
+#3 /var/www/kreblu/vendor/bin/phpunit(122): include('/var/www/kreblu...')
+#4 {main}
+  thrown in /var/www/kreblu/vendor/composer/autoload_real.php on line 41
