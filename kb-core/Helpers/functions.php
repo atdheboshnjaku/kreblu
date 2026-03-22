@@ -19,7 +19,7 @@
  */
 function kb_app(): Kreblu\Core\App
 {
-    return Kreblu\Core\App::getInstance();
+	return Kreblu\Core\App::getInstance();
 }
 
 /**
@@ -27,7 +27,7 @@ function kb_app(): Kreblu\Core\App
  */
 function kb_db(): Kreblu\Core\Database\Connection
 {
-    return kb_app()->db();
+	return kb_app()->db();
 }
 
 // ---------------------------------------------------------------
@@ -39,7 +39,7 @@ function kb_db(): Kreblu\Core\Database\Connection
  */
 function kb_add_action(string $hook, callable $callback, int $priority = 10): void
 {
-    kb_app()->hooks()->addAction($hook, $callback, $priority);
+	kb_app()->hooks()->addAction($hook, $callback, $priority);
 }
 
 /**
@@ -47,7 +47,7 @@ function kb_add_action(string $hook, callable $callback, int $priority = 10): vo
  */
 function kb_add_filter(string $hook, callable $callback, int $priority = 10): void
 {
-    kb_app()->hooks()->addFilter($hook, $callback, $priority);
+	kb_app()->hooks()->addFilter($hook, $callback, $priority);
 }
 
 /**
@@ -55,7 +55,7 @@ function kb_add_filter(string $hook, callable $callback, int $priority = 10): vo
  */
 function kb_do_action(string $hook, mixed ...$args): void
 {
-    kb_app()->hooks()->doAction($hook, ...$args);
+	kb_app()->hooks()->doAction($hook, ...$args);
 }
 
 /**
@@ -63,7 +63,7 @@ function kb_do_action(string $hook, mixed ...$args): void
  */
 function kb_apply_filters(string $hook, mixed $value, mixed ...$args): mixed
 {
-    return kb_app()->hooks()->applyFilters($hook, $value, ...$args);
+	return kb_app()->hooks()->applyFilters($hook, $value, ...$args);
 }
 
 /**
@@ -71,7 +71,7 @@ function kb_apply_filters(string $hook, mixed $value, mixed ...$args): mixed
  */
 function kb_remove_action(string $hook, callable $callback, int $priority = 10): void
 {
-    kb_app()->hooks()->removeAction($hook, $callback, $priority);
+	kb_app()->hooks()->removeAction($hook, $callback, $priority);
 }
 
 /**
@@ -79,7 +79,7 @@ function kb_remove_action(string $hook, callable $callback, int $priority = 10):
  */
 function kb_remove_filter(string $hook, callable $callback, int $priority = 10): void
 {
-    kb_app()->hooks()->removeFilter($hook, $callback, $priority);
+	kb_app()->hooks()->removeFilter($hook, $callback, $priority);
 }
 
 // ---------------------------------------------------------------
@@ -91,8 +91,18 @@ function kb_remove_filter(string $hook, callable $callback, int $priority = 10):
  */
 function kb_get_option(string $key, mixed $default = null): mixed
 {
-    // TODO: Implement with database query + autoload cache
-    return $default;
+	try {
+		$row = kb_db()->table('options')
+			->where('option_key', '=', $key)
+			->first();
+		if ($row === null) {
+			return $default;
+		}
+		$decoded = json_decode($row->option_value, true);
+		return (json_last_error() === JSON_ERROR_NONE) ? $decoded : $row->option_value;
+	} catch (\Throwable) {
+		return $default;
+	}
 }
 
 /**
@@ -100,8 +110,22 @@ function kb_get_option(string $key, mixed $default = null): mixed
  */
 function kb_update_option(string $key, mixed $value): bool
 {
-    // TODO: Implement with database upsert + cache invalidation
-    return false;
+	$storedValue = is_array($value) || is_object($value) ? json_encode($value) : (string) $value;
+	$existing = kb_db()->table('options')
+		->where('option_key', '=', $key)
+		->first();
+	if ($existing !== null) {
+		kb_db()->table('options')
+			->where('option_key', '=', $key)
+			->update(['option_value' => $storedValue]);
+	} else {
+		kb_db()->table('options')->insert([
+			'option_key'   => $key,
+			'option_value' => $storedValue,
+			'autoload'     => 1,
+		]);
+	}
+	return true;
 }
 
 // ---------------------------------------------------------------
@@ -113,8 +137,7 @@ function kb_update_option(string $key, mixed $value): bool
  */
 function kb_get_post(int $id): ?object
 {
-    // TODO: Implement in Phase 1 (Content system)
-    return null;
+	return (new Kreblu\Core\Content\PostManager(kb_db()))->findById($id);
 }
 
 /**
@@ -125,8 +148,7 @@ function kb_get_post(int $id): ?object
  */
 function kb_get_posts(array $args = []): array
 {
-    // TODO: Implement in Phase 1 (Content system)
-    return [];
+	return (new Kreblu\Core\Content\PostManager(kb_db()))->query($args);
 }
 
 /**
@@ -136,8 +158,11 @@ function kb_get_posts(array $args = []): array
  */
 function kb_insert_post(array $data): int|false
 {
-    // TODO: Implement in Phase 1 (Content system)
-    return false;
+	try {
+		return (new Kreblu\Core\Content\PostManager(kb_db()))->create($data);
+	} catch (\Throwable) {
+		return false;
+	}
 }
 
 /**
@@ -147,8 +172,7 @@ function kb_insert_post(array $data): int|false
  */
 function kb_update_post(int $id, array $data): bool
 {
-    // TODO: Implement in Phase 1 (Content system)
-    return false;
+	return (new Kreblu\Core\Content\PostManager(kb_db()))->update($id, $data);
 }
 
 /**
@@ -156,8 +180,7 @@ function kb_update_post(int $id, array $data): bool
  */
 function kb_delete_post(int $id, bool $force = false): bool
 {
-    // TODO: Implement in Phase 1 (Content system)
-    return false;
+	return (new Kreblu\Core\Content\PostManager(kb_db()))->delete($id, $force);
 }
 
 // ---------------------------------------------------------------
@@ -169,7 +192,7 @@ function kb_delete_post(int $id, bool $force = false): bool
  */
 function kb_is_logged_in(): bool
 {
-    return kb_app()->auth()->isLoggedIn();
+	return kb_app()->auth()->isLoggedIn();
 }
 
 /**
@@ -177,7 +200,7 @@ function kb_is_logged_in(): bool
  */
 function kb_current_user_id(): int
 {
-    return kb_app()->auth()->currentUserId();
+	return kb_app()->auth()->currentUserId();
 }
 
 /**
@@ -185,7 +208,7 @@ function kb_current_user_id(): int
  */
 function kb_current_user(): ?object
 {
-    return kb_app()->auth()->currentUser();
+	return kb_app()->auth()->currentUser();
 }
 
 /**
@@ -193,7 +216,7 @@ function kb_current_user(): ?object
  */
 function kb_current_user_can(string $capability): bool
 {
-    return kb_app()->auth()->currentUserCan($capability);
+	return kb_app()->auth()->currentUserCan($capability);
 }
 
 // ---------------------------------------------------------------
@@ -205,9 +228,9 @@ function kb_current_user_can(string $capability): bool
  */
 function kb_sanitize_text(string $input): string
 {
-    // Remove script/style tags AND their contents before stripping remaining tags
-    $input = preg_replace('/<(script|style)\b[^>]*>.*?<\/\1>/is', '', $input);
-    return trim(strip_tags($input));
+	// Remove script/style tags AND their contents before stripping remaining tags
+	$input = preg_replace('/<(script|style)\b[^>]*>.*?<\/\1>/is', '', $input);
+	return trim(strip_tags($input));
 }
 
 /**
@@ -215,10 +238,10 @@ function kb_sanitize_text(string $input): string
  */
 function kb_sanitize_html(string $input): string
 {
-    $allowed = '<p><br><strong><b><em><i><u><a><ul><ol><li><h1><h2><h3><h4><h5><h6>'
-             . '<blockquote><code><pre><img><figure><figcaption><table><thead><tbody>'
-             . '<tr><th><td><span><div><hr><sub><sup>';
-    return strip_tags($input, $allowed);
+	$allowed = '<p><br><strong><b><em><i><u><a><ul><ol><li><h1><h2><h3><h4><h5><h6>'
+			. '<blockquote><code><pre><img><figure><figcaption><table><thead><tbody>'
+			. '<tr><th><td><span><div><hr><sub><sup>';
+	return strip_tags($input, $allowed);
 }
 
 /**
@@ -226,16 +249,16 @@ function kb_sanitize_html(string $input): string
  */
 function kb_sanitize_url(string $input): string
 {
-    $url = filter_var(trim($input), FILTER_SANITIZE_URL);
-    if ($url === false || !filter_var($url, FILTER_VALIDATE_URL)) {
-        return '';
-    }
-    // Only allow http and https schemes
-    $scheme = parse_url($url, PHP_URL_SCHEME);
-    if (!in_array($scheme, ['http', 'https'], true)) {
-        return '';
-    }
-    return $url;
+	$url = filter_var(trim($input), FILTER_SANITIZE_URL);
+	if ($url === false || !filter_var($url, FILTER_VALIDATE_URL)) {
+		return '';
+	}
+	// Only allow http and https schemes
+	$scheme = parse_url($url, PHP_URL_SCHEME);
+	if (!in_array($scheme, ['http', 'https'], true)) {
+		return '';
+	}
+	return $url;
 }
 
 /**
@@ -243,11 +266,11 @@ function kb_sanitize_url(string $input): string
  */
 function kb_sanitize_email(string $input): string
 {
-    $email = filter_var(trim($input), FILTER_SANITIZE_EMAIL);
-    if ($email === false || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        return '';
-    }
-    return $email;
+	$email = filter_var(trim($input), FILTER_SANITIZE_EMAIL);
+	if ($email === false || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+		return '';
+	}
+	return $email;
 }
 
 /**
@@ -255,8 +278,8 @@ function kb_sanitize_email(string $input): string
  */
 function kb_nonce_create(string $action): string
 {
-    // TODO: Implement in Phase 1 (Security)
-    return '';
+	$secret = defined('KREBLU_AUTH_SALT') ? KREBLU_AUTH_SALT : 'kreblu-default-salt';
+	return (new Kreblu\Core\Security\Nonce($secret))->create($action);
 }
 
 /**
@@ -264,8 +287,8 @@ function kb_nonce_create(string $action): string
  */
 function kb_nonce_verify(string $token, string $action): bool
 {
-    // TODO: Implement in Phase 1 (Security)
-    return false;
+	$secret = defined('KREBLU_AUTH_SALT') ? KREBLU_AUTH_SALT : 'kreblu-default-salt';
+	return (new Kreblu\Core\Security\Nonce($secret))->verify($token, $action);
 }
 
 /**
@@ -273,8 +296,8 @@ function kb_nonce_verify(string $token, string $action): bool
  */
 function kb_nonce_field(string $action): string
 {
-    $token = kb_nonce_create($action);
-    return '<input type="hidden" name="_kb_nonce" value="' . htmlspecialchars($token, ENT_QUOTES, 'UTF-8') . '">';
+	$secret = defined('KREBLU_AUTH_SALT') ? KREBLU_AUTH_SALT : 'kreblu-default-salt';
+	return (new Kreblu\Core\Security\Nonce($secret))->field($action);
 }
 
 // ---------------------------------------------------------------
@@ -286,7 +309,7 @@ function kb_nonce_field(string $action): string
  */
 function kb_cache_get(string $key): mixed
 {
-    return kb_app()->cache()->get($key);
+	return kb_app()->cache()->get($key);
 }
 
 /**
@@ -294,7 +317,7 @@ function kb_cache_get(string $key): mixed
  */
 function kb_cache_set(string $key, mixed $value, int $ttl = 3600): void
 {
-    kb_app()->cache()->set($key, $value, $ttl);
+	kb_app()->cache()->set($key, $value, $ttl);
 }
 
 /**
@@ -302,7 +325,7 @@ function kb_cache_set(string $key, mixed $value, int $ttl = 3600): void
  */
 function kb_cache_delete(string $key): void
 {
-    kb_app()->cache()->delete($key);
+	kb_app()->cache()->delete($key);
 }
 
 // ---------------------------------------------------------------
@@ -316,8 +339,8 @@ function kb_cache_delete(string $key): void
  */
 function kb_ai_generate(array $config): object
 {
-    // TODO: Implement in Phase 3 (AI module)
-    return (object) ['success' => false, 'text' => '', 'error' => 'AI module not initialized'];
+	// AI module not yet implemented — Phase 3
+	return (object) ['success' => false, 'text' => '', 'error' => 'AI module not yet available'];
 }
 
 // ---------------------------------------------------------------
@@ -331,8 +354,8 @@ function kb_ai_generate(array $config): object
  */
 function kb_send_email(string $to, string $subject, string $body, array $headers = []): bool
 {
-    // TODO: Implement in Phase 3 (Email module)
-    return false;
+	// Email module not yet implemented
+	return mail($to, $subject, $body);
 }
 
 // ---------------------------------------------------------------
@@ -344,8 +367,8 @@ function kb_send_email(string $to, string $subject, string $body, array $headers
  */
 function kb_redirect(string $url, int $status = 302): never
 {
-    header('Location: ' . $url, true, $status);
-    exit;
+	header('Location: ' . $url, true, $status);
+	exit;
 }
 
 /**
@@ -353,11 +376,11 @@ function kb_redirect(string $url, int $status = 302): never
  */
 function kb_abort(int $code, string $message = ''): never
 {
-    http_response_code($code);
-    if ($message !== '') {
-        echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
-    }
-    exit;
+	http_response_code($code);
+	if ($message !== '') {
+		echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+	}
+	exit;
 }
 
 /**
@@ -365,5 +388,5 @@ function kb_abort(int $code, string $message = ''): never
  */
 function kb_is_debug(): bool
 {
-    return (bool) kb_app()->config()->get('debug', false);
+	return (bool) kb_app()->config()->get('debug', false);
 }
