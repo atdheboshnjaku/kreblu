@@ -47,6 +47,7 @@ require KREBLU_ROOT . '/kb-core/autoload.php';
 require KREBLU_ROOT . '/kb-core/Helpers/functions.php';
 require KREBLU_ROOT . '/kb-core/Helpers/formatting.php';
 require KREBLU_ROOT . '/kb-core/Helpers/url.php';
+require KREBLU_ROOT . '/kb-core/Helpers/content.php';
 
 // Initialize the application container
 $app = Kreblu\Core\App::getInstance();

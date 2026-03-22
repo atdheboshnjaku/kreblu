@@ -12,7 +12,7 @@
         </div>
         @isset($post->body)
         <div class="post-body">
-            {!! $post->body !!}
+            {!! kb_prepare_content($post->body ?? '') !!}
         </div>
         @endisset
     </article>

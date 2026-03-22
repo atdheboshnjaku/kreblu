@@ -9,7 +9,7 @@
         @endisset
     </div>
     <div class="post-body">
-        {!! $post->body !!}
+        {!! kb_prepare_content($post->body ?? '') !!}
     </div>
 </article>
 @endsection

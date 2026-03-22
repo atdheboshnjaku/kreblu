@@ -38,6 +38,14 @@
 
         .empty-state { text-align: center; padding: 4rem 0; color: #888; }
         .empty-state h2 { color: #1a1a2e; margin-bottom: 0.5rem; }
+
+        code { background: #f0eee8; padding: 2px 6px; border-radius: 3px; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; font-size: 0.9em; color: #c6613f; }
+        pre { background: #f0eee8; padding: 1.25rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1rem; }
+        pre code { background: none; padding: 0; color: inherit; font-size: 0.85em; }
+        blockquote { border-left: 3px solid #c6613f; padding: 0.5rem 1rem; margin: 1rem 0; color: #666; font-style: italic; }
+        .post-body ul, .post-body ol { margin: 0 0 1rem 1.5rem; }
+        .post-body li { margin-bottom: 0.25rem; }
+        .post-body img { max-width: 100%; height: auto; border-radius: 6px; margin: 1rem 0; }
     </style>
 </head>
 <body>
