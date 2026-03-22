@@ -66,13 +66,13 @@ final class ConfigTest extends TestCase
     public function test_environment_variable_override(): void
     {
         // Set an env var
-        putenv('KB_DB_HOST=test_host');
+        putenv('KREBLU_DB_HOST=test_host');
 
         $config = new Config();
         $this->assertEquals('test_host', $config->get('db_host'));
 
         // Clean up
-        putenv('KB_DB_HOST');
+        putenv('KREBLU_DB_HOST');
     }
 
     public function test_debug_env_parsed_as_boolean(): void
@@ -87,11 +87,11 @@ final class ConfigTest extends TestCase
 
     public function test_port_env_parsed_as_integer(): void
     {
-        putenv('KB_DB_PORT=3307');
+        putenv('KREBLU_DB_PORT=3307');
 
         $config = new Config();
         $this->assertSame(3307, $config->get('db_port'));
 
-        putenv('KB_DB_PORT');
+        putenv('KREBLU_DB_PORT');
     }
 }

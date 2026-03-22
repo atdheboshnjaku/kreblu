@@ -63,19 +63,21 @@ final class Config
     private function loadFromConstants(): void
     {
         $mapping = [
-            'KB_DB_HOST'     => 'db_host',
-            'KB_DB_PORT'     => 'db_port',
-            'KB_DB_NAME'     => 'db_name',
-            'KB_DB_USER'     => 'db_user',
-            'KB_DB_PASS'     => 'db_pass',
-            'KB_DB_PREFIX'   => 'db_prefix',
-            'KB_SITE_URL'    => 'site_url',
-            'KB_DEBUG'       => 'debug',
-            'KB_ENV'         => 'environment',
-            'KB_AUTH_KEY'    => 'auth_key',
-            'KB_SECURE_KEY'  => 'secure_key',
-            'KB_NONCE_KEY'   => 'nonce_key',
-            'KB_NONCE_SALT'  => 'nonce_salt',
+            'KREBLU_DB_HOST'     => 'db_host',
+            'KREBLU_DB_PORT'     => 'db_port',
+            'KREBLU_DB_NAME'     => 'db_name',
+            'KREBLU_DB_USER'     => 'db_user',
+            'KREBLU_DB_PASS'     => 'db_pass',
+            'KREBLU_DB_PREFIX'   => 'db_prefix',
+            'KREBLU_SITE_URL'    => 'site_url',
+            'KREBLU_SITE_NAME'   => 'site_name',
+            'KREBLU_DEBUG'       => 'debug',
+            'KREBLU_ENV'         => 'environment',
+            'KREBLU_AUTH_SALT'   => 'auth_salt',
+            'KREBLU_AUTH_KEY'    => 'auth_key',
+            'KREBLU_SECURE_KEY'  => 'secure_key',
+            'KREBLU_NONCE_KEY'   => 'nonce_key',
+            'KREBLU_NONCE_SALT'  => 'nonce_salt',
         ];
 
         foreach ($mapping as $constant => $key) {
@@ -101,15 +103,15 @@ final class Config
     private function loadFromEnvironment(): void
     {
         $envMapping = [
-            'KB_DB_HOST'   => 'db_host',
-            'KB_DB_PORT'   => 'db_port',
-            'KB_DB_NAME'   => 'db_name',
-            'KB_DB_USER'   => 'db_user',
-            'KB_DB_PASS'   => 'db_pass',
-            'KB_DB_PREFIX' => 'db_prefix',
-            'KB_SITE_URL'  => 'site_url',
-            'KB_DEBUG'     => 'debug',
-            'KB_ENV'       => 'environment',
+            'KREBLU_DB_HOST'   => 'db_host',
+            'KREBLU_DB_PORT'   => 'db_port',
+            'KREBLU_DB_NAME'   => 'db_name',
+            'KREBLU_DB_USER'   => 'db_user',
+            'KREBLU_DB_PASS'   => 'db_pass',
+            'KREBLU_DB_PREFIX' => 'db_prefix',
+            'KREBLU_SITE_URL'  => 'site_url',
+            'KREBLU_DEBUG'     => 'debug',
+            'KREBLU_ENV'       => 'environment',
         ];
 
         foreach ($envMapping as $envVar => $key) {

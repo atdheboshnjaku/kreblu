@@ -328,10 +328,12 @@ final class AuthManager
 	 */
 	public function cookieParams(): array
 	{
+		$isSecure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+
 		return [
 			'expires'  => time() + $this->sessionLifetime,
 			'path'     => '/',
-			'secure'   => true,
+			'secure'   => $isSecure,
 			'httponly'  => true,
 			'samesite' => 'Lax',
 		];

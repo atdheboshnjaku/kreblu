@@ -20,12 +20,12 @@ final class DatabaseIntegrationTest extends TestCase
 
 	public static function setUpBeforeClass(): void
 	{
-		$host = $_ENV['KB_DB_HOST'] ?? '127.0.0.1';
-		$port = (int) ($_ENV['KB_DB_PORT'] ?? 3306);
-		$name = $_ENV['KB_DB_NAME'] ?? 'kreblu_test';
-		$user = $_ENV['KB_DB_USER'] ?? 'kreblu';
-		$pass = $_ENV['KB_DB_PASS'] ?? 'kreblu_dev';
-		$prefix = $_ENV['KB_DB_PREFIX'] ?? 'kb_test_';
+		$host = $_ENV['KREBLU_DB_HOST'] ?? '127.0.0.1';
+		$port = (int) ($_ENV['KREBLU_DB_PORT'] ?? 3306);
+		$name = $_ENV['KREBLU_DB_NAME'] ?? 'kreblu_test';
+		$user = $_ENV['KREBLU_DB_USER'] ?? 'kreblu';
+		$pass = $_ENV['KREBLU_DB_PASS'] ?? 'kreblu_dev';
+		$prefix = $_ENV['KREBLU_DB_PREFIX'] ?? 'kb_test_';
 
 		try {
 			self::$db = new Connection(

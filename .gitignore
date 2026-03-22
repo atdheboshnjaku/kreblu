@@ -14,15 +14,15 @@ node_modules/
 Thumbs.db
 
 # Environment config (contains credentials)
-os-config.php
+kb-config.php
 
 # User content (generated at runtime)
-os-content/uploads/*
-os-content/cache/*
-os-content/logs/*
-!os-content/uploads/.gitkeep
-!os-content/cache/.gitkeep
-!os-content/logs/.gitkeep
+kb-content/uploads/*
+kb-content/cache/*
+kb-content/logs/*
+!kb-content/uploads/.gitkeep
+!kb-content/cache/.gitkeep
+!kb-content/logs/.gitkeep
 
 # Docker data
 docker/mysql/data/
@@ -35,4 +35,3 @@ docker/mysql/data/
 
 # Other crap
 .qodo/
-.DS_Store/

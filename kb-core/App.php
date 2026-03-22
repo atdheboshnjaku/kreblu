@@ -140,16 +140,17 @@ final class App
 
         // Load active plugins
         if ($this->has('db') && defined('KREBLU_INSTALLED') && KREBLU_INSTALLED) {
-            $pluginLoader = new Plugin\PluginLoader($this);
-            $pluginLoader->loadActivePlugins();
+            // Load plugins (Phase 2 — skip if PluginLoader doesn't exist yet)
+            if (class_exists(Plugin\PluginLoader::class)) {
+                $pluginLoader = new Plugin\PluginLoader($this);
+                $pluginLoader->loadActivePlugins();
+            }
 
-            // Fire: all plugins are loaded, they can register hooks now
             $this->hooks()->doAction('plugins_loaded');
 
-            // Initialize built-in modules that are enabled
-            $this->initializeModules();
+            // Initialize built-in modules (Phase 3 — skip if classes don't exist)
+            // $this->initializeModules();
 
-            // Fire: everything is initialized, register post types / taxonomies here
             $this->hooks()->doAction('init');
         }
 
