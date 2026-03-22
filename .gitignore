@@ -35,3 +35,4 @@ docker/mysql/data/
 
 # Other crap
 .qodo/
+.DS_Store/
