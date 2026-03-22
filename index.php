@@ -71,12 +71,12 @@ if (str_starts_with($path, '/api/v1/')) {
 // Admin routes: /kb-admin/*
 // ---------------------------------------------------------------
 if (str_starts_with($path, '/kb-admin')) {
-	// Try cookie-based auth first (production with HTTPS)
+	// Try cookie-based auth first (production)
 	if (!$app->auth()->isLoggedIn()) {
 		$app->auth()->resolveFromRequest($request);
 	}
 
-	// Fall back to PHP session auth (local dev without HTTPS)
+	// Fall back to PHP session auth (local dev)
 	if (!$app->auth()->isLoggedIn()) {
 		if (session_status() === PHP_SESSION_NONE) { session_start(); }
 		if (isset($_SESSION['kb_user_id'])) {
@@ -87,14 +87,28 @@ if (str_starts_with($path, '/kb-admin')) {
 		}
 	}
 
-	$user = $app->auth()->currentUser();
+	// Logout route
+	if ($path === '/kb-admin/logout') {
+		if (session_status() === PHP_SESSION_NONE) { session_start(); }
+		$_SESSION = [];
+		session_destroy();
+		setcookie('kb_session', '', ['expires' => time() - 3600, 'path' => '/']);
+		header('Location: /kb-admin/');
+		exit;
+	}
 
+	// Login page
+	$user = $app->auth()->currentUser();
 	if ($user === null) {
 		echo renderAdminLogin($request);
 		exit;
 	}
 
-	echo renderAdminPlaceholder($user);
+	// Route to admin panel
+	require_once KREBLU_ROOT . '/kb-admin/controllers/AdminLayout.php';
+	require_once KREBLU_ROOT . '/kb-admin/controllers/AdminRouter.php';
+	$router = new Kreblu\Admin\AdminRouter($app, $request);
+	echo $router->handle();
 	exit;
 }
 
