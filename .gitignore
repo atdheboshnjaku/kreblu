@@ -9,8 +9,8 @@ node_modules/
 *.swo
 *~
 
-# OS
 .DS_Store
+**/.DS_Store
 Thumbs.db
 
 # Environment config (contains credentials)

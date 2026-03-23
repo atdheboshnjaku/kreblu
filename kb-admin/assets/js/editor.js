@@ -118,6 +118,15 @@ const toolbarActions = {
 	},
 
 	img() {
+		// Use media selector modal if available, otherwise fall back to URL input
+		if (typeof KBMediaSelector !== 'undefined') {
+			const sel = getSelection();
+			KBMediaSelector.open((item) => {
+				const alt = item.alt_text || item.title || '';
+				insertAt(`<img src="/${item.url}" alt="${alt}">`, sel.start, sel.end);
+			}, 'image');
+			return;
+		}
 		showPanel(`
 			<input type="url" placeholder="https://example.com/image.jpg" class="kb-input kb-input-sm" id="kb-panel-src" style="min-width:220px;">
 			<input type="text" placeholder="Alt text (description)" class="kb-input kb-input-sm" id="kb-panel-alt" style="min-width:160px;">
