@@ -128,7 +128,10 @@ final class AdminLayout
 				<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h4v4H3zM9 3h4v4H9zM3 9h4v4H3z"/></svg>
 				<span class="nav-label">Categories</span>
 			</a>
-
+			<a href="/kb-admin/menus" class="kb-nav-item{$active('menus')}">
+				<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h9M2 12h6"/></svg>
+				<span class="nav-label">Menus</span>
+			</a>
 			<div class="kb-nav-section">System</div>
 			<a href="/kb-admin/kaps" class="kb-nav-item{$active('kaps')}">
 				<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h8M4 8h8M4 12h5"/></svg>
@@ -165,7 +168,7 @@ final class AdminLayout
 					<span id="theme-icon">☀</span>
 				</button>
 				<a href="{$e($siteUrl)}" class="kb-topbar-link" target="_blank">View site</a>
-				<div class="kb-avatar">{$e($initials)}</div>
+				<a href="/kb-admin/profile" class="kb-avatar" title="Your profile" style="text-decoration:none;">{$e($initials)}</a>
 			</div>
 		</header>
 

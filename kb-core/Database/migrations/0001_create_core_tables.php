@@ -197,6 +197,46 @@ return [
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 		");
 
+		// -- Menus (no dependencies) --
+		$db->execute("
+			CREATE TABLE IF NOT EXISTS {$prefix}menus (
+				id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+				name            VARCHAR(200) NOT NULL,
+				slug            VARCHAR(200) NOT NULL,
+				location        VARCHAR(100) DEFAULT NULL,
+				description     VARCHAR(500) NOT NULL DEFAULT '',
+				created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+				updated_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+				UNIQUE KEY idx_slug (slug),
+				INDEX idx_location (location)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+		");
+
+		// -- Menu Items (depends on menus) --
+		$db->execute("
+			CREATE TABLE IF NOT EXISTS {$prefix}menu_items (
+				id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+				menu_id         BIGINT UNSIGNED NOT NULL,
+				parent_id       BIGINT UNSIGNED DEFAULT NULL,
+				type            VARCHAR(50) NOT NULL DEFAULT 'custom',
+				label           VARCHAR(500) NOT NULL,
+				url             VARCHAR(1000) NOT NULL DEFAULT '',
+				target          VARCHAR(20) NOT NULL DEFAULT '_self',
+				object_type     VARCHAR(50) DEFAULT NULL,
+				object_id       BIGINT UNSIGNED DEFAULT NULL,
+				css_classes     VARCHAR(500) NOT NULL DEFAULT '',
+				sort_order      INT NOT NULL DEFAULT 0,
+				meta            JSON DEFAULT NULL,
+
+				INDEX idx_menu (menu_id),
+				INDEX idx_parent (parent_id),
+				INDEX idx_sort (menu_id, sort_order),
+				FOREIGN KEY (menu_id) REFERENCES {$prefix}menus(id) ON DELETE CASCADE,
+				FOREIGN KEY (parent_id) REFERENCES {$prefix}menu_items(id) ON DELETE CASCADE
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+		");
+
 		// -- Options (site settings, no dependencies) --
 		$db->execute("
 			CREATE TABLE IF NOT EXISTS {$prefix}options (
@@ -229,6 +269,8 @@ return [
 
 		// Drop in reverse dependency order
 		$tables = [
+			'menu_items',
+			'menus',
 			'redirects',
 			'options',
 			'comments',
