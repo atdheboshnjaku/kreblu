@@ -95,10 +95,34 @@ HTML;
 
 		return '<div class="kb-card"><div class="kb-card-header"><h3>Reading</h3></div><div class="kb-card-body">'
 			. '<div class="kb-form-group"><label class="kb-label">Homepage display</label><div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;"><label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="radio" name="homepage_display" value="latest"' . $homeLatest . ' style="accent-color:var(--kb-rust);"> Your latest posts</label><label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="radio" name="homepage_display" value="static"' . $homeStatic . ' style="accent-color:var(--kb-rust);"> A static page</label></div></div>'
+			. $this->buildPageDropdown($opts)
 			. '<div class="kb-form-group"><label class="kb-label">Posts per page</label><input type="number" name="posts_per_page" class="kb-input" value="' . $e($opts['posts_per_page'] ?? '10') . '" style="max-width:100px;" min="1" max="100"></div>'
 			. '<div class="kb-form-group"><label class="kb-label">Feed shows</label><select name="feed_display" class="kb-select" style="max-width:200px;"><option value="full"' . $this->selected($opts['feed_display'] ?? 'full', 'full') . '>Full text</option><option value="excerpt"' . $this->selected($opts['feed_display'] ?? 'full', 'excerpt') . '>Excerpt</option></select></div>'
 			. '<div class="kb-form-group"><label class="kb-label">Search engine visibility</label><label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;margin-top:4px;"><input type="checkbox" name="discourage_search_engines" value="1"' . $this->checked($opts['discourage_search_engines'] ?? '0') . ' style="accent-color:var(--kb-rust);width:15px;height:15px;"> Discourage search engines from indexing this site</label><span style="font-size:11px;color:var(--kb-text-hint);margin-top:4px;display:block;">Adds a noindex meta tag. Search engines may still index the site.</span></div>'
 			. '</div></div>';
+	}
+
+	private function buildPageDropdown(array $opts): string
+	{
+		$db = $this->app->db();
+		$e = fn(string $s): string => $this->e($s);
+		$pages = $db->table('posts')->where('type', '=', 'page')->where('status', '=', 'published')->orderBy('title', 'ASC')->get();
+
+		$currentHomepage = $opts['static_homepage_id'] ?? '';
+		$currentPostsPage = $opts['static_posts_page_id'] ?? '';
+
+		$homeOptions = '<option value="">— Select —</option>';
+		$postsOptions = '<option value="">— None —</option>';
+		foreach ($pages as $page) {
+			$homeOptions .= '<option value="' . $page->id . '"' . ($this->selected($currentHomepage, (string) $page->id)) . '>' . $e($page->title) . '</option>';
+			$postsOptions .= '<option value="' . $page->id . '"' . ($this->selected($currentPostsPage, (string) $page->id)) . '>' . $e($page->title) . '</option>';
+		}
+
+		return '<div id="kb-static-page-options" style="margin-left:26px;margin-top:4px;' . (($opts['homepage_display'] ?? 'latest') !== 'static' ? 'display:none;' : '') . '">'
+			. '<div class="kb-form-group"><label class="kb-label">Homepage</label><select name="static_homepage_id" class="kb-select" style="max-width:260px;">' . $homeOptions . '</select></div>'
+			. '<div class="kb-form-group"><label class="kb-label">Posts page</label><select name="static_posts_page_id" class="kb-select" style="max-width:260px;">' . $postsOptions . '</select></div>'
+			. '</div>'
+			. '<script>document.querySelectorAll(\'input[name="homepage_display"]\').forEach(r=>r.addEventListener("change",()=>{document.getElementById("kb-static-page-options").style.display=r.value==="static"&&r.checked?"":"none";}));</script>';
 	}
 
 	private function settingsWriting(array $opts, \Closure $e): string
@@ -156,7 +180,7 @@ HTML;
 	{
 		return [
 			'general' => ['site_name', 'site_description', 'site_url', 'timezone', 'date_format', 'time_format'],
-			'reading' => ['homepage_display', 'posts_per_page', 'feed_display', 'discourage_search_engines'],
+			'reading' => ['homepage_display', 'static_homepage_id', 'static_posts_page_id', 'posts_per_page', 'feed_display', 'discourage_search_engines'],
 			'writing' => ['default_post_status', 'default_comment_status', 'autosave_interval', 'excerpt_length'],
 			'permalinks' => ['permalink_structure', 'permalink_custom'],
 			'email' => ['email_from_name', 'email_from_address', 'smtp_enabled', 'smtp_host', 'smtp_port', 'smtp_encryption', 'smtp_username', 'smtp_password'],
