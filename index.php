@@ -106,6 +106,18 @@ if (str_starts_with($path, '/kb-admin')) {
 
 	// Route to admin panel
 	require_once KREBLU_ROOT . '/kb-admin/controllers/AdminLayout.php';
+	require_once KREBLU_ROOT . '/kb-admin/controllers/BaseController.php';
+	// BaseController first above
+	require_once KREBLU_ROOT . '/kb-admin/controllers/DashboardController.php';
+	require_once KREBLU_ROOT . '/kb-admin/controllers/PostController.php';
+	require_once KREBLU_ROOT . '/kb-admin/controllers/CommentController.php';
+	require_once KREBLU_ROOT . '/kb-admin/controllers/CategoryController.php';
+	require_once KREBLU_ROOT . '/kb-admin/controllers/MediaController.php';
+	require_once KREBLU_ROOT . '/kb-admin/controllers/UserController.php';
+	require_once KREBLU_ROOT . '/kb-admin/controllers/SettingsController.php';
+	require_once KREBLU_ROOT . '/kb-admin/controllers/MenuController.php';
+	require_once KREBLU_ROOT . '/kb-admin/controllers/TemplateController.php';
+	// AdminRouter last
 	require_once KREBLU_ROOT . '/kb-admin/controllers/AdminRouter.php';
 	$router = new Kreblu\Admin\AdminRouter($app, $request);
 	echo $router->handle();
