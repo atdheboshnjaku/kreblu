@@ -1,0 +1,16 @@
+{
+	"name": "Developer Default",
+	"slug": "developer-default",
+	"version": "1.0.0",
+	"description": "A clean, minimal template designed for developers. Simple layout with good typography and code highlighting.",
+	"author": "Kreblu",
+	"author_url": "https://kreblu.com",
+	"license": "MIT",
+	"requires_kreblu": "1.0.0",
+	"screenshot": "screenshot.png",
+	"locations": {
+		"primary": "Primary navigation",
+		"footer": "Footer navigation"
+	},
+	"settings": {}
+}
