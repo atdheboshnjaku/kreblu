@@ -106,6 +106,11 @@ HTML;
 		return $layout->render($content);
 	}
 
+	private function wysiwygContent(string $html): string
+	{
+		return "'" . str_replace(["\\", "'", "\n", "\r", "</"], ["\\\\", "\\'", "\\n", "\\r", "<\\/"], $html) . "'";
+	}
+
 	public function editor(AdminLayout $layout, string $type, ?int $id = null): string
 	{
 		$layout->setTitle($id ? 'Edit ' . $type : 'New ' . $type);
@@ -250,28 +255,6 @@ CATS;
 			$slugFieldHtml = '<div class="kb-form-group"><label class="kb-label">Slug</label><div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--kb-text-hint);">/<span id="kb-slug-display">...</span></div><input type="hidden" name="slug" id="kb-editor-slug" value=""></div>';
 		}
 
-		// Toolbar
-		$toolbar = <<<TB
-		<div id="kb-editor-toolbar" style="display:flex;flex-wrap:wrap;gap:2px;padding:8px 12px;border-bottom:1px solid var(--kb-border);background:var(--kb-bg-secondary);border-radius:var(--kb-radius) var(--kb-radius) 0 0;">
-			<button type="button" data-action="bold" class="kb-toolbar-btn" title="Bold (Ctrl+B)"><strong>B</strong></button>
-			<button type="button" data-action="italic" class="kb-toolbar-btn" title="Italic (Ctrl+I)"><em>I</em></button>
-			<span style="width:1px;background:var(--kb-border);margin:2px 4px;"></span>
-			<button type="button" data-action="h2" class="kb-toolbar-btn" title="Heading 2">H2</button>
-			<button type="button" data-action="h3" class="kb-toolbar-btn" title="Heading 3">H3</button>
-			<button type="button" data-action="p" class="kb-toolbar-btn" title="Paragraph">P</button>
-			<span style="width:1px;background:var(--kb-border);margin:2px 4px;"></span>
-			<button type="button" data-action="link" class="kb-toolbar-btn" title="Link (Ctrl+K)">Link</button>
-			<button type="button" data-action="img" class="kb-toolbar-btn" title="Image">Img</button>
-			<span style="width:1px;background:var(--kb-border);margin:2px 4px;"></span>
-			<button type="button" data-action="ul" class="kb-toolbar-btn" title="Unordered list">UL</button>
-			<button type="button" data-action="ol" class="kb-toolbar-btn" title="Ordered list">OL</button>
-			<button type="button" data-action="blockquote" class="kb-toolbar-btn" title="Blockquote">Quote</button>
-			<button type="button" data-action="code" class="kb-toolbar-btn" title="Inline code">Code</button>
-			<button type="button" data-action="codeblock" class="kb-toolbar-btn" title="Code block">Pre</button>
-			<button type="button" data-action="hr" class="kb-toolbar-btn" title="Horizontal rule">HR</button>
-		</div>
-TB;
-
 		$content = <<<HTML
 		<div style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
 			<a href="{$listUrl}" style="font-size:12px;color:var(--kb-text-secondary);">&larr; Back to {$type}s</a>
@@ -285,8 +268,8 @@ TB;
 					<div class="kb-card" style="overflow:hidden;">
 						<div class="kb-card-body" style="padding:0;">
 							<input type="text" name="title" id="kb-editor-title" value="{$e($title)}" placeholder="Title..." style="font-size:18px;font-weight:700;padding:16px 18px;border:none;background:transparent;width:100%;color:var(--kb-text);font-family:inherit;border-bottom:1px solid var(--kb-border);">
-							{$toolbar}
-							<textarea name="body" id="kb-editor-body" class="kb-textarea" rows="20" placeholder="Write your content here..." style="font-size:14px;line-height:1.7;border:none;border-radius:0;padding:16px 18px;min-height:400px;">{$e($body)}</textarea>
+							<div id="kb-editor-wysiwyg"></div>
+							<input type="hidden" name="body" id="kb-editor-body-hidden">
 						</div>
 					</div>
 					<div id="kb-word-count" style="font-size:11px;color:var(--kb-text-hint);"></div>
@@ -316,10 +299,79 @@ TB;
 				</div>
 			</div>
 		</form>
-		<style>.kb-toolbar-btn{background:none;border:1px solid transparent;border-radius:3px;padding:4px 8px;font-size:12px;color:var(--kb-text-secondary);cursor:pointer;font-family:inherit;line-height:1;}.kb-toolbar-btn:hover{background:var(--kb-card);border-color:var(--kb-border);color:var(--kb-text);}.kb-panel-form{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}.kb-panel-form .kb-input-sm{padding:5px 8px;font-size:12px;max-width:220px;}</style>
 		<script src="/kb-admin/assets/js/media.js"></script>
-		<script src="/kb-admin/assets/js/editor.js"></script>
+		<script src="/kb-admin/assets/js/kb-editor.js"></script>
 		<script>
+		// Initialize WYSIWYG editor
+		const editorContainer = document.getElementById('kb-editor-wysiwyg');
+		const hiddenBody = document.getElementById('kb-editor-body-hidden');
+		const wordCountEl = document.getElementById('kb-word-count');
+		let isDirty = false;
+
+		const editor = new KBEditor(editorContainer, {
+			placeholder: 'Start writing...',
+			content: {$this->wysiwygContent($body)},
+			onChange: (html) => {
+				hiddenBody.value = html;
+				isDirty = true;
+				const indicator = document.getElementById('kb-save-indicator');
+				if (indicator) { indicator.textContent = 'Unsaved changes'; indicator.style.color = 'var(--kb-warning)'; }
+				if (wordCountEl) {
+					const count = editor.getWordCount();
+					wordCountEl.textContent = count + ' word' + (count !== 1 ? 's' : '');
+				}
+			},
+		});
+
+		// Set initial hidden value
+		hiddenBody.value = editor.getHTML();
+		if (wordCountEl) {
+			const count = editor.getWordCount();
+			wordCountEl.textContent = count + ' word' + (count !== 1 ? 's' : '');
+		}
+
+		// Sync before submit
+		document.getElementById('kb-editor-form')?.addEventListener('submit', () => {
+			hiddenBody.value = editor.getHTML();
+			isDirty = false;
+		});
+
+		// Unsaved changes warning
+		window.addEventListener('beforeunload', (e) => {
+			if (isDirty) { e.preventDefault(); e.returnValue = ''; }
+		});
+
+		// Ctrl+S to save
+		document.addEventListener('keydown', (e) => {
+			if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+				e.preventDefault();
+				document.getElementById('kb-editor-form')?.submit();
+			}
+		});
+
+		// Auto-slug from title
+		const titleField = document.getElementById('kb-editor-title');
+		const slugField = document.getElementById('kb-editor-slug');
+		const slugDisplay = document.getElementById('kb-slug-display');
+		let slugManuallyEdited = false;
+
+		const slugify = (text) => text.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_]+/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '');
+
+		if (titleField && slugField && slugField.value === '') {
+			titleField.addEventListener('input', () => {
+				if (slugManuallyEdited) return;
+				const slug = slugify(titleField.value);
+				slugField.value = slug;
+				if (slugDisplay) slugDisplay.textContent = slug || '...';
+			});
+		}
+		slugField?.addEventListener('input', () => {
+			slugManuallyEdited = true;
+			slugField.value = slugify(slugField.value);
+			if (slugDisplay) slugDisplay.textContent = slugField.value || '...';
+		});
+
+		// Featured image
 		function selectFeaturedImage() {
 			KBMediaSelector.open(function(item) {
 				document.getElementById('kb-featured-id').value = item.id;
