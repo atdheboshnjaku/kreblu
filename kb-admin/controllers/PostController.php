@@ -111,6 +111,9 @@ HTML;
 		return "'" . str_replace(["\\", "'", "\n", "\r", "</"], ["\\\\", "\\'", "\\n", "\\r", "<\\/"], $html) . "'";
 	}
 
+	/**
+	 * REPLACE the editor() method in PostController.php with this.
+	 */
 	public function editor(AdminLayout $layout, string $type, ?int $id = null): string
 	{
 		$layout->setTitle($id ? 'Edit ' . $type : 'New ' . $type);
@@ -134,22 +137,18 @@ HTML;
 			];
 
 			$slugInput = $this->request->input('slug', '');
-			if ($slugInput !== '') {
-				$data['slug'] = $slugInput;
-			}
+			if ($slugInput !== '') { $data['slug'] = $slugInput; }
 
 			if ($id) {
 				$posts->update($id, $data);
 				$catIds = array_map('intval', $this->request->input('categories', []));
 				$taxonomy->setPostTerms($id, 'category', $catIds);
 				if ($this->app->has('cache')) { $this->app->cache()->clearPageCache(); }
-				$layout->addNotice('success', ucfirst($type) . ' updated successfully.');
+				$layout->addNotice('success', ucfirst($type) . ' updated.');
 			} else {
 				$id = $posts->create($data);
 				$catIds = array_map('intval', $this->request->input('categories', []));
-				if (!empty($catIds)) {
-					$taxonomy->setPostTerms($id, 'category', $catIds);
-				}
+				if (!empty($catIds)) { $taxonomy->setPostTerms($id, 'category', $catIds); }
 				if ($this->app->has('cache')) { $this->app->cache()->clearPageCache(); }
 				header('Location: /kb-admin/' . $type . 's/edit/' . $id);
 				exit;
@@ -157,9 +156,7 @@ HTML;
 		}
 
 		$post = null;
-		if ($id) {
-			$post = $db->table('posts')->where('id', '=', $id)->first();
-		}
+		if ($id) { $post = $db->table('posts')->where('id', '=', $id)->first(); }
 
 		$title = $post->title ?? '';
 		$body = $post->body ?? '';
@@ -168,231 +165,175 @@ HTML;
 		$featuredImageId = $post->featured_image ?? null;
 		$listUrl = $type === 'page' ? '/kb-admin/pages' : '/kb-admin/posts';
 		$actionUrl = $id ? "/kb-admin/{$type}s/edit/{$id}" : "/kb-admin/{$type}s/new";
+		$isNew = $id === null;
 
-		// Categories (only for posts)
-		$categoriesHtml = '';
+		// Status
+		$statusDraft = $this->selected($status, 'draft');
+		$statusPub = $this->selected($status, 'published');
+
+		// Categories
+		$catHtml = '';
 		if ($type === 'post') {
-			$allCategories = $taxonomy->getTerms('category');
-			$assignedIds = [];
-			if ($id) {
-				$assigned = $taxonomy->getPostTerms($id, 'category');
-				$assignedIds = array_map(fn(object $t) => (int) $t->id, $assigned);
+			$allCats = $taxonomy->getTerms('category');
+			$assignedIds = $id ? array_map(fn($t) => (int) $t->id, $taxonomy->getPostTerms($id, 'category')) : [];
+			foreach ($allCats as $cat) {
+				$chk = in_array((int) $cat->id, $assignedIds) ? ' checked' : '';
+				$catHtml .= '<label style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:13px;cursor:pointer;"><input type="checkbox" name="categories[]" value="' . (int) $cat->id . '"' . $chk . ' style="accent-color:var(--kb-rust);width:14px;height:14px;"> ' . $e($cat->name) . '</label>';
 			}
-
-			$catItems = '';
-			foreach ($allCategories as $cat) {
-				$checked = in_array((int) $cat->id, $assignedIds) ? ' checked' : '';
-				$catItems .= '<div class="kb-checkbox-group"><input type="checkbox" name="categories[]" value="' . (int) $cat->id . '" id="cat-' . (int) $cat->id . '"' . $checked . '><label for="cat-' . (int) $cat->id . '">' . $e($cat->name) . '</label></div>';
-			}
-
-			if ($catItems === '') {
-				$catItems = '<p style="font-size:12px;color:var(--kb-text-hint);">No categories yet. Create one in Categories.</p>';
-			}
-
-			$categoriesHtml = <<<CATS
-			<div class="kb-card">
-				<div class="kb-card-header"><h3>Categories</h3></div>
-				<div class="kb-card-body" style="max-height:180px;overflow-y:auto;">{$catItems}</div>
-			</div>
-CATS;
+			if (!$catHtml) $catHtml = '<span style="font-size:12px;color:var(--kb-text-hint);">No categories yet.</span>';
 		}
 
 		// Featured image
-		$featuredImageHtml = '';
-		$featuredPreviewHtml = '';
-		$featuredBtnStyle = '';
+		$featPreview = '';
+		$featBtnVis = '';
 		if ($featuredImageId) {
 			try {
-				$mediaManager = new \Kreblu\Core\Content\MediaManager($this->app->db(), KREBLU_ROOT);
-				$mediaItem = $mediaManager->findById((int) $featuredImageId);
-				if ($mediaItem && str_starts_with($mediaItem->mime_type, 'image/')) {
-					$imgUrl = '/' . $mediaManager->getUrl($mediaItem->filepath);
-					$featuredPreviewHtml = '<div id="kb-featured-preview" style="margin-bottom:8px;"><img src="' . $e($imgUrl) . '" style="width:100%;border-radius:var(--kb-radius);"><button type="button" class="kb-btn kb-btn-outline kb-btn-sm" style="margin-top:6px;" onclick="removeFeaturedImage()">Remove</button></div>';
-					$featuredBtnStyle = ' style="display:none;"';
+				$mm = new \Kreblu\Core\Content\MediaManager($this->app->db(), KREBLU_ROOT);
+				$mi = $mm->findById((int) $featuredImageId);
+				if ($mi && str_starts_with($mi->mime_type, 'image/')) {
+					$featPreview = '<div id="kb-feat-preview" style="margin-top:8px;"><img src="/' . $e($mm->getUrl($mi->filepath)) . '" style="max-height:120px;border-radius:var(--kb-radius);"><br><button type="button" class="kbe-link-btn" onclick="removeFeaturedImage()" style="margin-top:4px;">Remove</button></div>';
+					$featBtnVis = ' style="display:none;"';
 				}
 			} catch (\Throwable) {}
 		}
-		$featuredImageHtml = '<div class="kb-card"><div class="kb-card-header"><h3>Featured image</h3></div><div class="kb-card-body"><div id="kb-featured-wrap">' . $featuredPreviewHtml . '<button type="button" class="kb-btn kb-btn-outline kb-btn-sm" id="kb-featured-btn"' . $featuredBtnStyle . ' onclick="selectFeaturedImage()">Set featured image</button></div><input type="hidden" name="featured_image" id="kb-featured-id" value="' . $e((string) ($featuredImageId ?? '')) . '"></div></div>';
 
-		// Revisions
-		$revisionsHtml = '';
-		if ($id) {
-			$revisions = $posts->getRevisions($id);
-			if (!empty($revisions)) {
-				$revItems = '';
-				$count = min(count($revisions), 5);
-				for ($i = 0; $i < $count; $i++) {
-					$rev = $revisions[$i];
-					$revItems .= '<div style="padding:6px 0;border-bottom:1px solid var(--kb-border);font-size:12px;">';
-					$revItems .= '<span style="color:var(--kb-text);">' . $e($rev->title) . '</span>';
-					$revItems .= '<span style="color:var(--kb-text-hint);display:block;">' . $e($rev->created_at) . '</span>';
-					$revItems .= '</div>';
-				}
-				$revisionsHtml = '<div class="kb-card"><div class="kb-card-header"><h3>Revisions (' . count($revisions) . ')</h3></div><div class="kb-card-body">' . $revItems . '</div></div>';
-			}
+		// Trash/restore/delete buttons
+		$trashHtml = '';
+		if ($id && $post && $post->status !== 'trash') {
+			$trashHtml = '<a href="/kb-admin/' . $type . 's/trash/' . $id . '" class="kbe-trash-btn" onclick="return confirm(\'Move to trash?\')"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10M5 4V3h6v1M6 7v4M10 7v4M4 4l1 9h6l1-9"/></svg> Trash</a>';
+		} elseif ($id && $post && $post->status === 'trash') {
+			$trashHtml = '<a href="/kb-admin/' . $type . 's/restore/' . $id . '" class="kb-btn kb-btn-outline kb-btn-sm" style="font-size:12px;">Restore</a>'
+				. '<a href="/kb-admin/' . $type . 's/delete/' . $id . '" class="kbe-trash-btn" onclick="return confirm(\'Delete permanently?\')"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10M5 4V3h6v1M6 7v4M10 7v4M4 4l1 9h6l1-9"/></svg> Delete</a>';
 		}
 
-		// Delete/trash buttons
-		$deleteHtml = '';
-		if ($id && $post) {
-			if ($post->status === 'trash') {
-				$deleteHtml = '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--kb-border);">';
-				$deleteHtml .= '<a href="/kb-admin/' . $type . 's/restore/' . $id . '" class="kb-btn kb-btn-outline kb-btn-sm" style="margin-right:6px;">Restore</a>';
-				$deleteHtml .= '<a href="/kb-admin/' . $type . 's/delete/' . $id . '" class="kb-btn kb-btn-danger kb-btn-sm" id="kb-delete-btn" data-delete-action="force" onclick="return confirm(\'Permanently delete? This cannot be undone.\')">Delete permanently</a>';
-				$deleteHtml .= '</div>';
-			} else {
-				$deleteHtml = '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--kb-border);">';
-				$deleteHtml .= '<a href="/kb-admin/' . $type . 's/trash/' . $id . '" class="kb-btn kb-btn-danger kb-btn-sm" id="kb-delete-btn" data-delete-action="trash" onclick="return confirm(\'Move to trash?\')">Move to trash</a>';
-				$deleteHtml .= '</div>';
-			}
-		}
-
-		// Slug field
-		$slugFieldHtml = '';
-		if ($id) {
-			$slugFieldHtml = '<div class="kb-form-group"><label class="kb-label">Slug</label><div style="display:flex;align-items:center;gap:6px;"><span style="font-size:12px;color:var(--kb-text-hint);">/' . '</span><input type="text" name="slug" id="kb-editor-slug" class="kb-input" value="' . $e($slug) . '" style="font-size:12px;"></div></div>';
-		} else {
-			$slugFieldHtml = '<div class="kb-form-group"><label class="kb-label">Slug</label><div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--kb-text-hint);">/<span id="kb-slug-display">...</span></div><input type="hidden" name="slug" id="kb-editor-slug" value=""></div>';
-		}
+		$catSection = $type === 'post' ? '<div class="kbe-drawer-section"><div class="kbe-drawer-label">Categories</div><div style="max-height:140px;overflow-y:auto;">' . $catHtml . '</div></div>' : '';
+		$bodyJson = $this->wysiwygContent($body);
 
 		$content = <<<HTML
-		<div style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
-			<a href="{$listUrl}" style="font-size:12px;color:var(--kb-text-secondary);">&larr; Back to {$type}s</a>
-			<span id="kb-save-indicator" style="font-size:11px;color:var(--kb-text-hint);"></span>
-		</div>
-		<div id="kb-inline-panel" style="display:none;padding:10px 14px;margin-bottom:12px;border:1px solid var(--kb-border);border-radius:var(--kb-radius);background:var(--kb-card);"></div>
 		<form method="POST" action="{$actionUrl}" id="kb-editor-form">
 			<input type="hidden" name="type" value="{$type}">
-			<div class="kb-grid-2">
-				<div class="kb-stack">
-					<div class="kb-card" style="overflow:hidden;">
-						<div class="kb-card-body" style="padding:0;">
-							<input type="text" name="title" id="kb-editor-title" value="{$e($title)}" placeholder="Title..." style="font-size:18px;font-weight:700;padding:16px 18px;border:none;background:transparent;width:100%;color:var(--kb-text);font-family:inherit;border-bottom:1px solid var(--kb-border);">
-							<div id="kb-editor-wysiwyg"></div>
-							<input type="hidden" name="body" id="kb-editor-body-hidden">
-						</div>
-					</div>
-					<div id="kb-word-count" style="font-size:11px;color:var(--kb-text-hint);"></div>
+			<input type="hidden" name="body" id="kb-editor-body-hidden">
+			<input type="hidden" name="featured_image" id="kb-feat-id" value="{$e((string) ($featuredImageId ?? ''))}">
+
+			<div class="kbe-writing">
+				<input type="text" name="title" id="kb-editor-title" value="{$e($title)}" placeholder="Title" class="kbe-title">
+				<div class="kbe-slug-row" id="kb-slug-row">
+					<span>/</span>
+					<input type="text" name="slug" id="kb-editor-slug" value="{$e($slug)}" class="kbe-slug-input" placeholder="auto-generated">
 				</div>
-				<div class="kb-stack">
-					<div class="kb-card">
-						<div class="kb-card-header"><h3>Publish</h3></div>
-						<div class="kb-card-body">
-							<div class="kb-form-group">
-								<label class="kb-label">Status</label>
-								<select name="status" class="kb-select">
-									<option value="draft" {$this->selected($status, 'draft')}>Draft</option>
-									<option value="published" {$this->selected($status, 'published')}>Published</option>
-								</select>
-							</div>
-							{$slugFieldHtml}
-							<div style="display:flex;gap:8px;margin-top:12px;">
-								<button type="submit" class="kb-btn kb-btn-primary">Save</button>
-								<a href="{$listUrl}" class="kb-btn kb-btn-outline">Cancel</a>
-							</div>
-							{$deleteHtml}
+				<div id="kb-editor-wysiwyg"></div>
+			</div>
+
+			<!-- Settings drawer -->
+			<div class="kbe-drawer" id="kbe-drawer">
+				<div class="kbe-drawer-hd">
+					<span>Settings</span>
+					<button type="button" class="kbe-drawer-close" onclick="document.getElementById('kbe-drawer').classList.remove('open')">&times;</button>
+				</div>
+				<div class="kbe-drawer-bd">
+					<div class="kbe-drawer-section">
+						<div class="kbe-drawer-label">Featured image</div>
+						<div id="kb-feat-wrap">
+							{$featPreview}
+							<button type="button" class="kbe-link-btn" id="kb-feat-btn"{$featBtnVis} onclick="selectFeaturedImage()">Set featured image</button>
 						</div>
 					</div>
-					{$featuredImageHtml}
-					{$categoriesHtml}
-					{$revisionsHtml}
+					{$catSection}
 				</div>
 			</div>
 		</form>
+
 		<script src="/kb-admin/assets/js/media.js"></script>
 		<script src="/kb-admin/assets/js/kb-editor.js"></script>
 		<script>
-		// Initialize WYSIWYG editor
-		const editorContainer = document.getElementById('kb-editor-wysiwyg');
-		const hiddenBody = document.getElementById('kb-editor-body-hidden');
-		const wordCountEl = document.getElementById('kb-word-count');
-		let isDirty = false;
-
-		const editor = new KBEditor(editorContainer, {
-			placeholder: 'Start writing...',
-			content: {$this->wysiwygContent($body)},
-			onChange: (html) => {
-				hiddenBody.value = html;
-				isDirty = true;
-				const indicator = document.getElementById('kb-save-indicator');
-				if (indicator) { indicator.textContent = 'Unsaved changes'; indicator.style.color = 'var(--kb-warning)'; }
-				if (wordCountEl) {
-					const count = editor.getWordCount();
-					wordCountEl.textContent = count + ' word' + (count !== 1 ? 's' : '');
-				}
-			},
-		});
-
-		// Set initial hidden value
-		hiddenBody.value = editor.getHTML();
-		if (wordCountEl) {
-			const count = editor.getWordCount();
-			wordCountEl.textContent = count + ' word' + (count !== 1 ? 's' : '');
-		}
-
-		// Sync before submit
-		document.getElementById('kb-editor-form')?.addEventListener('submit', () => {
-			hiddenBody.value = editor.getHTML();
-			isDirty = false;
-		});
-
-		// Unsaved changes warning
-		window.addEventListener('beforeunload', (e) => {
-			if (isDirty) { e.preventDefault(); e.returnValue = ''; }
-		});
-
-		// Ctrl+S to save
-		document.addEventListener('keydown', (e) => {
-			if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-				e.preventDefault();
-				document.getElementById('kb-editor-form')?.submit();
+		(() => {
+			// === Replace topbar content with editor controls ===
+			const topbar = document.querySelector('.kb-topbar');
+			if (topbar) {
+				topbar.innerHTML = `
+					<div class="kbe-topbar">
+						<a href="{$listUrl}" class="kbe-topbar-back">&larr; {$e(ucfirst($type))}s</a>
+						<div class="kbe-topbar-center">
+							<span id="kb-save-ind" style="font-size:11px;color:var(--kb-text-hint);"></span>
+							<span id="kb-word-count" style="font-size:11px;color:var(--kb-text-hint);"></span>
+						</div>
+						<div class="kbe-topbar-actions">
+							{$trashHtml}
+							<select name="status" form="kb-editor-form" class="kb-select" style="font-size:12px;padding:5px 28px 5px 8px;min-width:0;">
+								<option value="draft" {$statusDraft}>Draft</option>
+								<option value="published" {$statusPub}>Published</option>
+							</select>
+							<button type="submit" form="kb-editor-form" class="kb-btn kb-btn-primary kb-btn-sm">Save</button>
+							<button type="button" class="kbe-settings-btn" onclick="document.getElementById('kbe-drawer').classList.toggle('open')" title="Settings">⚙</button>
+						</div>
+					</div>`;
 			}
-		});
 
-		// Auto-slug from title
-		const titleField = document.getElementById('kb-editor-title');
-		const slugField = document.getElementById('kb-editor-slug');
-		const slugDisplay = document.getElementById('kb-slug-display');
-		let slugManuallyEdited = false;
+			// === Init editor ===
+			const hiddenBody = document.getElementById('kb-editor-body-hidden');
+			const wordEl = document.getElementById('kb-word-count');
+			let dirty = false;
 
-		const slugify = (text) => text.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_]+/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '');
-
-		if (titleField && slugField && slugField.value === '') {
-			titleField.addEventListener('input', () => {
-				if (slugManuallyEdited) return;
-				const slug = slugify(titleField.value);
-				slugField.value = slug;
-				if (slugDisplay) slugDisplay.textContent = slug || '...';
+			const editor = new KBEditor('#kb-editor-wysiwyg', {
+				placeholder: 'Start writing... type / for commands',
+				content: {$bodyJson},
+				onChange: (html) => {
+					hiddenBody.value = html;
+					dirty = true;
+					const ind = document.getElementById('kb-save-ind');
+					if (ind) { ind.textContent = 'Unsaved'; ind.style.color = 'var(--kb-warning)'; }
+					if (wordEl) { const c = editor.getWordCount(); wordEl.textContent = c + ' word' + (c !== 1 ? 's' : ''); }
+				},
 			});
-		}
-		slugField?.addEventListener('input', () => {
-			slugManuallyEdited = true;
-			slugField.value = slugify(slugField.value);
-			if (slugDisplay) slugDisplay.textContent = slugField.value || '...';
-		});
 
-		// Featured image
-		function selectFeaturedImage() {
-			KBMediaSelector.open(function(item) {
-				document.getElementById('kb-featured-id').value = item.id;
-				var wrap = document.getElementById('kb-featured-wrap');
-				var btn = document.getElementById('kb-featured-btn');
-				var old = document.getElementById('kb-featured-preview');
-				if (old) old.remove();
-				var div = document.createElement('div');
-				div.id = 'kb-featured-preview';
-				div.style.marginBottom = '8px';
-				div.innerHTML = '<img src="/' + item.url + '" style="width:100%;border-radius:var(--kb-radius);"><button type="button" class="kb-btn kb-btn-outline kb-btn-sm" style="margin-top:6px;" onclick="removeFeaturedImage()">Remove</button>';
-				wrap.insertBefore(div, btn);
-				btn.style.display = 'none';
-			}, 'image');
-		}
-		function removeFeaturedImage() {
-			document.getElementById('kb-featured-id').value = '';
-			var preview = document.getElementById('kb-featured-preview');
-			if (preview) preview.remove();
-			document.getElementById('kb-featured-btn').style.display = '';
-		}
+			hiddenBody.value = editor.getHTML();
+			if (wordEl) { const c = editor.getWordCount(); wordEl.textContent = c + ' word' + (c !== 1 ? 's' : ''); }
+
+			// Form submit
+			document.getElementById('kb-editor-form')?.addEventListener('submit', () => { hiddenBody.value = editor.getHTML(); dirty = false; });
+			window.addEventListener('beforeunload', (e) => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+			document.addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); document.getElementById('kb-editor-form')?.submit(); } });
+
+			// === Slug logic ===
+			const titleField = document.getElementById('kb-editor-title');
+			const slugField = document.getElementById('kb-editor-slug');
+			let slugManual = slugField.value !== '';
+			const slugify = (t) => t.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_]+/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '');
+
+			titleField?.addEventListener('input', () => {
+				if (slugManual) return;
+				slugField.value = slugify(titleField.value);
+			});
+
+			slugField?.addEventListener('input', () => { slugManual = true; });
+			slugField?.addEventListener('blur', () => {
+				if (slugField.value.trim() === '') {
+					slugManual = false;
+					slugField.value = slugify(titleField?.value ?? '');
+				}
+			});
+
+			// === Featured image ===
+			window.selectFeaturedImage = () => {
+				KBMediaSelector.open((item) => {
+					document.getElementById('kb-feat-id').value = item.id;
+					const wrap = document.getElementById('kb-feat-wrap');
+					const btn = document.getElementById('kb-feat-btn');
+					document.getElementById('kb-feat-preview')?.remove();
+					const div = document.createElement('div');
+					div.id = 'kb-feat-preview';
+					div.style.marginTop = '8px';
+					div.innerHTML = '<img src="/' + item.url + '" style="max-height:120px;border-radius:var(--kb-radius);"><br><button type="button" class="kbe-link-btn" onclick="removeFeaturedImage()" style="margin-top:4px;">Remove</button>';
+					wrap.insertBefore(div, btn);
+					btn.style.display = 'none';
+				}, 'image');
+			};
+			window.removeFeaturedImage = () => {
+				document.getElementById('kb-feat-id').value = '';
+				document.getElementById('kb-feat-preview')?.remove();
+				document.getElementById('kb-feat-btn').style.display = '';
+			};
+		})();
 		</script>
 HTML;
 
